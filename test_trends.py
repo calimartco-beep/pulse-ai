@@ -1,25 +1,35 @@
-from pytrends.request import TrendReq
+import sys
 
-pytrends = TrendReq(
-    hl="en-US",
-    tz=360
-)
+from backend.services.trend_sources import get_google_trend_history
 
-keyword = "Squishy Toys"
 
-pytrends.build_payload(
-    [keyword],
-    timeframe="today 3-m",
-    geo="US"
-)
+def main():
+    keyword = " ".join(sys.argv[1:]).strip() or "Squishy Toys"
 
-data = pytrends.interest_over_time()
+    print(f"\nTesting Pulse AI Google Trends service for: {keyword}")
 
-print(data)
+    trend_data = get_google_trend_history(keyword)
+    history = trend_data.get("history", [])
+    status = trend_data.get("status", "Unavailable")
 
-if data.empty:
-    print("\nNO DATA RETURNED")
-else:
-    print("\nNUMBER OF DATA POINTS:", len(data))
-    print("VALUES:")
-    print(data[keyword].tolist())
+    print(f"\nDATA STATUS: {status}")
+    print(f"NUMBER OF DATA POINTS: {len(history)}")
+
+    if not history:
+        print(
+            "\nNo Google Trends history is currently available. "
+            "Pulse AI may be observing its rate-limit cooldown."
+        )
+        return
+
+    print("\nMOST RECENT 10 DATA POINTS:")
+
+    for data_point in history[-10:]:
+        print(
+            f"{data_point['date']}: "
+            f"{data_point['interest']}"
+        )
+
+
+if __name__ == "__main__":
+    main()
