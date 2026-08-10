@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Product Analyzer | Pulse AI</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #f5f7fb;
+            color: #111827;
+        }
+
+        header {
+            background: #111827;
+            color: white;
+            padding: 28px 40px;
+        }
+
+        .header-content {
+            max-width: 1100px;
+            margin: auto;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        header p {
+            margin: 8px 0 0;
+            color: #9ca3af;
+        }
+
+        main {
+            max-width: 1100px;
+            margin: auto;
+            padding: 40px;
+        }
+
+        .navigation {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .navigation a {
+            color: #4338ca;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .search-panel {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+        }
+
+        .search-panel h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        .description {
+            margin: 8px 0 22px;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        .search-form {
+            display: flex;
+            gap: 12px;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 0;
+            padding: 13px 14px;
+            border: 1px solid #d1d5db;
+            border-radius: 10px;
+            color: #111827;
+            font-size: 16px;
+        }
+
+        .search-input:focus {
+            outline: 2px solid #6366f1;
+            border-color: transparent;
+        }
+
+        .analyze-button {
+            padding: 13px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #111827;
+            color: white;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .analyze-button:hover {
+            background: #1f2937;
+        }
+
+        .analyze-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .safety-note {
+            margin-top: 18px;
+            padding: 14px;
+            border-radius: 10px;
+            background: #ecfdf5;
+            color: #166534;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
+        .results {
+            display: none;
+            margin-top: 30px;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .result-summary {
+            background: #111827;
+            color: white;
+            border-radius: 20px;
+            padding: 30px;
+        }
+
+        .summary-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 25px;
+        }
+
+        .summary-name {
+            margin: 0;
+            font-size: 30px;
+        }
+
+        .stage {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 7px 11px;
+            border-radius: 999px;
+            background: #312e81;
+            color: #c7d2fe;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .score-area {
+            min-width: 145px;
+            text-align: center;
+        }
+
+        .score {
+            font-size: 54px;
+            font-weight: bold;
+            line-height: 1;
+        }
+
+        .score-label {
+            margin-top: 8px;
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .summary-metrics {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        .summary-metric {
+            padding: 14px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .metric-label {
+            color: #9ca3af;
+            font-size: 12px;
+        }
+
+        .metric-value {
+            margin-top: 6px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .recommendation {
+            margin-top: 20px;
+            padding: 18px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.07);
+            color: #e5e7eb;
+            line-height: 1.6;
+        }
+
+        .section {
+            margin-top: 30px;
+        }
+
+        .section h2 {
+            margin: 0 0 16px;
+            font-size: 23px;
+        }
+
+        .source-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+        }
+
+        .source-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .source-name {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .source-name h3 {
+            margin: 0;
+            font-size: 19px;
+        }
+
+        .status {
+            padding: 6px 9px;
+            border-radius: 999px;
+            background: #f3f4f6;
+            color: #4b5563;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .status.available {
+            background: #ecfdf5;
+            color: #166534;
+        }
+
+        .source-score {
+            margin-top: 18px;
+            font-size: 34px;
+            font-weight: bold;
+        }
+
+        .source-signal {
+            margin-top: 7px;
+            color: #4338ca;
+            font-weight: bold;
+        }
+
+        .source-details {
+            margin-top: 15px;
+            color: #6b7280;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .prototype-warning {
+            display: none;
+            margin-top: 28px;
+            padding: 20px;
+            border: 1px solid #fed7aa;
+            border-radius: 14px;
+            background: #fff7ed;
+            color: #9a3412;
+            line-height: 1.6;
+        }
+
+        .prototype-warning.active {
+            display: block;
+        }
+
+        .prototype-warning strong {
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .missing-list {
+            margin: 0;
+            padding: 22px 22px 22px 42px;
+            border: 1px solid #e5e7eb;
+            border-radius: 14px;
+            background: white;
+            color: #4b5563;
+        }
+
+        .missing-list li {
+            margin-bottom: 9px;
+            line-height: 1.5;
+        }
+
+        .missing-list li:last-child {
+            margin-bottom: 0;
+        }
+
+        .error-message {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 10px;
+            background: #fef2f2;
+            color: #991b1b;
+            line-height: 1.5;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        @media (max-width: 760px) {
+            header,
+            main {
+                padding-left: 20px;
+                padding-right: 20px;
+            }
+
+            .search-form {
+                flex-direction: column;
+            }
+
+            .summary-top {
+                flex-direction: column;
+            }
+
+            .score-area {
+                text-align: left;
+            }
+
+            .source-grid,
+            .summary-metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <div class="header-content">
+            <h1>🔎 Pulse AI Product Analyzer</h1>
+
+            <p>
+                Verified opportunity analysis without invented data
+            </p>
+        </div>
+    </header>
+
+    <main>
+        <nav class="navigation">
+            <a href="index.html">
+                ← Dashboard
+            </a>
+
+            <a href="tiktok.html">
+                TikTok Signal Collector
+            </a>
+        </nav>
+
+        <section class="search-panel">
+            <h2>Analyze a Product</h2>
+
+            <p class="description">
+                Enter a product, keyword, or saved TikTok signal.
+                Pulse AI will combine only the authorized data
+                currently available.
+            </p>
+
+            <form class="search-form" id="analyzerForm">
+                <input
+                    class="search-input"
+                    id="productName"
+                    type="text"
+                    placeholder="Example: Blind Boxes"
+                    required
+                >
+
+                <button
+                    class="analyze-button"
+                    id="analyzeButton"
+                    type="submit"
+                >
+                    Analyze Product
+                </button>
+            </form>
+
+            <div class="safety-note">
+                Prototype numbers are shown only as context and are
+                never included in the verified score. Missing sources
+                remain clearly marked as unavailable.
+            </div>
+
+            <div
+                class="error-message"
+                id="errorMessage"
+                role="alert"
+            ></div>
+        </section>
+
+        <section class="results" id="results">
+            <div class="result-summary">
+                <div class="summary-top">
+                    <div>
+                        <h2
+                            class="summary-name"
+                            id="resultName"
+                        >
+                            --
+                        </h2>
+
+                        <div class="stage" id="resultStage">
+                            --
+                        </div>
+                    </div>
+
+                    <div class="score-area">
+                        <div class="score" id="verifiedScore">
+                            --
+                        </div>
+
+                        <div class="score-label">
+                            Verified Signal Score
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-metrics">
+                    <div class="summary-metric">
+                        <div class="metric-label">
+                            Confidence
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="confidence"
+                        >
+                            --
+                        </div>
+                    </div>
+
+                    <div class="summary-metric">
+                        <div class="metric-label">
+                            Verified Sources
+                        </div>
+
+                        <div
+                            class="metric-value"
+                            id="sourceCount"
+                        >
+                            --
+                        </div>
+                    </div>
+                </div>
+
+                <div
+                    class="recommendation"
+                    id="recommendation"
+                >
+                    --
+                </div>
+            </div>
+
+            <section class="section">
+                <h2>Source Breakdown</h2>
+
+                <div class="source-grid" id="sourceGrid">
+                </div>
+            </section>
+
+            <div
+                class="prototype-warning"
+                id="prototypeWarning"
+            ></div>
+
+            <section class="section">
+                <h2>Data Still Needed</h2>
+
+                <ul
+                    class="missing-list"
+                    id="missingList"
+                ></ul>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        function getApiBase() {
+            const hostname = window.location.hostname;
+
+            if (
+                hostname.includes(
+                    "-3000.app.github.dev"
+                )
+            ) {
+                return (
+                    "https://"
+                    + hostname.replace(
+                        "-3000.app.github.dev",
+                        "-8000.app.github.dev"
+                    )
+                );
+            }
+
+            return "http://127.0.0.1:8000";
+        }
+
+
+        const API_BASE = getApiBase();
+
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        function formatScore(value) {
+            if (
+                value === null
+                || value === undefined
+            ) {
+                return "--";
+            }
+
+            return `${value}/100`;
+        }
+
+
+        function formatValue(value, suffix = "") {
+            if (
+                value === null
+                || value === undefined
+            ) {
+                return "--";
+            }
+
+            return `${value}${suffix}`;
+        }
+
+
+        function createSourceCard(
+            name,
+            icon,
+            source
+        ) {
+            const available =
+                source.available === true;
+
+            let details = "";
+
+            if (name === "TikTok") {
+                details = `
+                    Snapshots:
+                    ${source.snapshot_count || 0}
+                    <br>
+
+                    View growth:
+                    ${formatValue(source.view_growth, "%")}
+                    <br>
+
+                    Engagement:
+                    ${formatValue(source.engagement_rate, "%")}
+                `;
+            }
+
+            if (name === "Google") {
+                details = `
+                    Data points:
+                    ${source.data_points || 0}
+                    <br>
+
+                    Momentum:
+                    ${formatValue(source.momentum, "%")}
+                    <br>
+
+                    Direction:
+                    ${formatValue(source.trend_direction)}
+                `;
+            }
+
+            if (name === "Whatnot") {
+                details = `
+                    Official seller report not available yet.
+                    Pulse AI will not use prototype Whatnot
+                    numbers as verified evidence.
+                `;
+            }
+
+            return `
+                <article class="source-card">
+                    <div class="source-name">
+                        <h3>
+                            ${icon} ${name}
+                        </h3>
+
+                        <div
+                            class="status ${
+                                available
+                                    ? "available"
+                                    : ""
+                            }"
+                        >
+                            ${
+                                available
+                                    ? "VERIFIED"
+                                    : "UNAVAILABLE"
+                            }
+                        </div>
+                    </div>
+
+                    <div class="source-score">
+                        ${formatScore(source.score)}
+                    </div>
+
+                    <div class="source-signal">
+                        ${escapeHtml(
+                            source.signal
+                            || "Unavailable"
+                        )}
+                    </div>
+
+                    <div class="source-details">
+                        ${details}
+
+                        <br>
+                        Status:
+                        ${escapeHtml(
+                            source.data_status
+                            || "Unavailable"
+                        )}
+                    </div>
+                </article>
+            `;
+        }
+
+
+        function displayResults(data) {
+            document.getElementById(
+                "resultName"
+            ).textContent = data.product;
+
+            document.getElementById(
+                "resultStage"
+            ).textContent = data.stage;
+
+            document.getElementById(
+                "verifiedScore"
+            ).textContent = formatScore(
+                data.verified_score
+            );
+
+            document.getElementById(
+                "confidence"
+            ).textContent = data.confidence;
+
+            document.getElementById(
+                "sourceCount"
+            ).textContent =
+                `${data.verified_source_count}`
+                + ` of ${data.required_verified_sources}`;
+
+            document.getElementById(
+                "recommendation"
+            ).textContent = data.recommendation;
+
+            document.getElementById(
+                "sourceGrid"
+            ).innerHTML = [
+                createSourceCard(
+                    "TikTok",
+                    "📱",
+                    data.sources.tiktok
+                ),
+
+                createSourceCard(
+                    "Google",
+                    "📈",
+                    data.sources.google
+                ),
+
+                createSourceCard(
+                    "Whatnot",
+                    "🎥",
+                    data.sources.whatnot
+                )
+            ].join("");
+
+            const prototypeWarning =
+                document.getElementById(
+                    "prototypeWarning"
+                );
+
+            if (
+                data.prototype_context
+                && data.prototype_context.available
+            ) {
+                const prototype =
+                    data.prototype_context;
+
+                prototypeWarning.className =
+                    "prototype-warning active";
+
+                prototypeWarning.innerHTML = `
+                    <strong>
+                        Prototype context found
+                    </strong>
+
+                    Pulse AI has sample data for this product:
+                    TikTok ${prototype.tiktok_growth},
+                    Whatnot ${prototype.whatnot_growth},
+                    Google ${prototype.google_growth}, and
+                    competition ${prototype.competition}.
+                    These numbers are excluded from the verified
+                    score because they are not live evidence.
+                `;
+
+            } else {
+                prototypeWarning.className =
+                    "prototype-warning";
+
+                prototypeWarning.textContent = "";
+            }
+
+            const missingList =
+                document.getElementById(
+                    "missingList"
+                );
+
+            missingList.innerHTML =
+                data.missing_data
+                    .map(
+                        item => `
+                            <li>
+                                ${escapeHtml(item)}
+                            </li>
+                        `
+                    )
+                    .join("");
+
+            document.getElementById(
+                "results"
+            ).className = "results active";
+        }
+
+
+        async function analyzeProduct(event) {
+            event.preventDefault();
+
+            const productName =
+                document.getElementById(
+                    "productName"
+                ).value.trim();
+
+            const button =
+                document.getElementById(
+                    "analyzeButton"
+                );
+
+            const errorMessage =
+                document.getElementById(
+                    "errorMessage"
+                );
+
+            errorMessage.className =
+                "error-message";
+
+            errorMessage.textContent = "";
+
+            button.disabled = true;
+            button.textContent = "Analyzing...";
+
+            try {
+                const response = await fetch(
+                    (
+                        `${API_BASE}/analyze/`
+                        + encodeURIComponent(
+                            productName
+                        )
+                    )
+                );
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.detail
+                        || "Unable to analyze product."
+                    );
+                }
+
+                displayResults(data);
+
+            } catch (error) {
+                errorMessage.className =
+                    "error-message active";
+
+                errorMessage.textContent =
+                    error.message;
+
+            } finally {
+                button.disabled = false;
+                button.textContent =
+                    "Analyze Product";
+            }
+        }
+
+
+        document.getElementById(
+            "analyzerForm"
+        ).addEventListener(
+            "submit",
+            analyzeProduct
+        );
+    </script>
+</body>
+</html>
